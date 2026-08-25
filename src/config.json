@@ -193,6 +193,6 @@
     "Orange Mii (F)": "Melinoe",
     "Red Mii (M)": "Man"
   },
-  "backupLocation": "./backups/",
+  "backupLocation": "./backup/backups/",
   "numBackupsKept": 10
 }

@@ -25,17 +25,10 @@ def prune_backups(config, backup_dir):
     backups.remove(oldest_backup)
 
 
-def restore_backup(actual_statsConfig):
-  pass
+def get_backup():
   backup_csv = filedialog.askopenfilename(title="Select a Backup")   # Prompt the user to select the sheet with the stats
 
   if not backup_csv: raise Exception('No file selected.')
   if not backup_csv.endswith('.csv'): raise Exception('You must select a valid xlsx file.')
 
-  print(backup_csv)
-
-  backupData = pd.read_csv(backup_csv)
-  
-  gc = gspread.service_account(filename='credentials.json')
-  sheet = gc.open_by_url(actual_statsConfig['statSheetURL']) 
-  worksheet = sheet.worksheet(actual_statsConfig['sheetName'])
+  return pd.read_csv(backup_csv)

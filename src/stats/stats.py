@@ -5,8 +5,6 @@ import pandas as pd
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from src.backup.backups import create_backup, restore_backup
-
 
 def read_new_stats(general_config, pitching_config): 
   stat_sheet = filedialog.askopenfilename(title="Select a File")   # Prompt the user to select the sheet with the stats
@@ -20,7 +18,7 @@ def read_new_stats(general_config, pitching_config):
   general_stats = general_stats.rename(columns=general_config['statMapping'])    # Rename the stats so they match the actual stat sheet
   # This next statement gets rid of any positions that aren't the player's starting position
   # For example if Luigi started as pitcher and swapped to catcher, his position would be P, C
-  # The statement could get rid of everything other than the P
+  # This gets rid of everything other than the P
   general_stats['position'] = general_stats['position'].apply(lambda x: x if x.find(',') == -1 else x[0:x.find(',')])
 
   pitching_stats = pd.read_excel(stat_sheet, sheet_name=pitching_config['sheet'])    # Get the third sheet with the pitching stats
@@ -40,7 +38,6 @@ def read_actual_stats(actual_stats_config):    # TODO: Maybe don't prune so we c
   sheet = gc.open_by_url(actual_stats_config['stat_sheetURL']) 
   worksheet = sheet.worksheet(actual_stats_config['sheetName'])
   actual_stats = get_as_dataframe(worksheet)
-  actual_stats = actual_stats.drop(columns=actual_stats_config['statsToDrop'])
 
   return actual_stats
 
@@ -53,30 +50,20 @@ def update_actual_stats(new_stats, actual_stats):
   # TODO: Update games played manually
 
 
-def main():
+def update_stats():
   with open('config.json', 'r') as config_file:    # Open the file
     config = json.load(config_file)    # Get the config
 
-  restore_backup(config["actual_stats"])
+  new_stats = None
 
-  # new_stats = None
-
-  # while 1:
-  #   try:
-  #     new_stats = read_new_stats(config["general_stats"], config["pitching_stats"])    # Get the stats 
-  #     actual_stats = read_actual_stats(config["actual_stats"])
-  #     create_backup(config, actual_stats)
-  #     update_actual_stats(new_stats, actual_stats)
-  #     break
-  #   except Exception as e:
-  #     raise e   # TODO: Remove this once done
-  #     choice = messagebox.askyesno(
-  #       title="ERROR", 
-  #       message=f'{e}\n\nWould you like to try again?',
-  #       icon='error'
-  #     )
-  #     if not choice: return
-
-
-if __name__ == '__main__':
-  main()
+  new_stats = read_new_stats(config["general_stats"], config["pitching_stats"])    # Get the stats 
+  actual_stats = read_actual_stats(config["actual_stats"])
+  update_actual_stats(new_stats, actual_stats)
+    # except Exception as e:
+    #   raise e   # TODO: Remove this once done
+    #   choice = messagebox.askyesno(
+    #     title="ERROR", 
+    #     message=f'{e}\n\nWould you like to try again?',
+    #     icon='error'
+    #   )
+    #   if not choice: return
