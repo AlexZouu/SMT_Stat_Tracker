@@ -195,6 +195,5 @@
     "Red Mii (M)": "Man"
   },
   "backupLocation": "./Backups/",
-  "numBackupsKept": 10,
-  "daysBackupsKept": 15
+  "numBackupsKept": 10
 }

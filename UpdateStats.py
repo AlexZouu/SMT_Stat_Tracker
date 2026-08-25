@@ -1,11 +1,11 @@
-from datetime import datetime
 import gspread
 from gspread_dataframe import get_as_dataframe
 import json
 import pandas as pd
-from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
+from Backups import createBackup
 
 
 def readNewStats(generalConfig, pitchingConfig): 
@@ -51,14 +51,6 @@ def readActualStats(config):    # TODO: Maybe don't prune so we can use set_with
   actualStats = actualStats.drop(columns=config['statsToDrop'])
 
   return actualStats
-
-
-def createBackup(config, actualStats):
-  backupDir = Path(config['backupLocation'])
-  backupName = f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
-
-  backupDir.mkdir(parents=True, exist_ok=True)
-  actualStats.to_csv(backupDir / backupName, index=False)
 
 
 def updateActualStats(newStats, actualStats):
