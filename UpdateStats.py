@@ -1,53 +1,89 @@
 import gspread
+from gspread_dataframe import get_as_dataframe
 import json
 import pandas as pd
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 
-def readNewStats(): 
-  statSheet = filedialog.askopenfilename(title="Select a File")
+def readNewStats(generalConfig, pitchingConfig): 
+  statSheet = filedialog.askopenfilename(title="Select a File")   # Prompt the user to select the sheet with the stats
 
-  if not statSheet or not statSheet.endswith('.xlsx'): return None, None
-  
-  generalStats = pd.read_excel(statSheet, sheet_name=1)
-  pitchingStats = pd.read_excel(statSheet, sheet_name=2)
+  if not statSheet: raise Exception('No file selected.')
+  if not statSheet.endswith('.xlsx'): raise Exception('You must select a valid xlsx file.')
 
-  pitchingStats = pitchingStats.drop('Team', axis=1).iloc[:len(pitchingStats) - 2]
+  generalStats = pd.read_excel(statSheet, sheet_name=generalConfig['sheet'])    # Get the second sheet with the general player stats
+  generalStats = generalStats.drop(generalConfig['rowsToDrop'])   # Drop the rows with the team summary
+  generalStats = generalStats.drop(columns=generalConfig['statsToDrop'])    # Drop any stats we don't want
+  generalStats = generalStats.rename(columns=generalConfig['statMapping'])    # Rename the stats so they match the actual stat sheet
+  # This next statement gets rid of any positions that aren't the player's starting position
+  # For example if Luigi started as pitcher and swapped to catcher, his position would be P, C
+  # The statement could get rid of everything other than the P
+  generalStats['position'] = generalStats['position'].apply(lambda x: x if x.find(',') == -1 else x[0:x.find(',')])
 
-  combinedStats = pd.merge(generalStats, pitchingStats, on='Player', how='left')
+  pitchingStats = pd.read_excel(statSheet, sheet_name=pitchingConfig['sheet'])    # Get the third sheet with the pitching stats
+  pitchingStats = pitchingStats.drop(columns=pitchingConfig['statsToDrop']).iloc[:len(pitchingStats) - 2]    # Drop stats we don't want and team summary (last two rows)
+  pitchingStats = pitchingStats.rename(columns=pitchingConfig['statMapping'])   # Rename the stats so they match the actual stat sheet
 
-  combinedStats = combinedStats.set_index('Player')
+  # Note: We have the rename the stats before combining the general and pitching stats as there are duplicate stat names
 
-  split = len(combinedStats) // 2
+  combinedStats = pd.merge(generalStats, pitchingStats, on='Player', how='left')    # Merge the pitching stats into the general stats based on the player
+  combinedStats = combinedStats.fillna(0)   # Fill the pitching stats that are NaN with 0
 
-  team1 = combinedStats.iloc[:split - 1]
-  team2 = combinedStats.iloc[split:len(combinedStats) - 1]
+  # split = len(combinedStats) // 2   # Split it in half for team 1 and team 2
 
-  return team1, team2
+  # team1 = combinedStats.iloc[:split]
+  # team2 = combinedStats.iloc[split:len(combinedStats)]
+
+  # team1['Team'] = team1.iat[0, 0]   # Set the team for each player to the correct team
+  # team2['Team'] = team2.iat[0, 0]
+
+  return combinedStats
+
+
+def readActualStats(config):    # TODO: Maybe don't prune so we use set_with_dataframe
+  gc = gspread.service_account(filename='credentials.json')
+  sheet = gc.open_by_url(config['statSheetURL']) 
+  worksheet = sheet.worksheet(config['sheetName'])
+  actualStats = get_as_dataframe(worksheet)
+  actualStats = actualStats.drop(columns=config['statsToDrop'])
+
+  return actualStats
+
+
+def createBackup(actualStats):
+  pass
+
+
+def updateActualStats(newStats, actualStats):
+  actualStats = actualStats[actualStats['Player'].isin(newStats['Player'])]
+
+  # print(newStats[~newStats['Player'].isin(actualStats['Player'])])
+
+  # TODO: Update games played manually
 
 
 def main():
-  with open('config.json', 'r') as config_file:
-    config = json.load(config_file)
+  with open('config.json', 'r') as configFile:    # Open the file
+    config = json.load(configFile)    # Get the config
 
-  team1, team2 = readNewStats()
+  newStats = None
 
-  if not team1 or not team2: 
-    print('Please select a valid file')
-    return
-
-  print(team1)
-  print(team2)
-
-  # gc = gspread.service_account(filename='credentials.json')
-
-  # sheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1vjeD0yJj0-T-sQ5uCXtmwkisrzmnMArj/edit?gid=1986828901#gid=1986828901') 
-
-  # worksheet = sheet.sheet1
-
-  # all_rows = worksheet.get_all_values()
-  # print('All values:', all_rows)
+  while 1:
+    try:
+      newStats = readNewStats(config["generalStats"], config["pitchingStats"])    # Get the stats 
+      actualStats = readActualStats(config["actualStats"])
+      createBackup(actualStats)
+      updateActualStats(newStats, actualStats)
+      break
+    except Exception as e:
+      raise e   # TODO: Remove this once done
+      choice = messagebox.askyesno(
+        title="ERROR", 
+        message=f'{e}\n\nWould you like to try again?',
+        icon='error'
+      )
+      if not choice: return
 
 
 if __name__ == '__main__':

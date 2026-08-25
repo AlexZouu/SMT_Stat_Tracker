@@ -1,10 +1,105 @@
 {
-  "newStats": {
-    "overallStats": {
-      "sheetNum": 1
-    },
-    "pitchingStats": {
-      "sheetNum": 2
+  "actualStats": {
+    "statSheetURL": "https://docs.google.com/spreadsheets/d/1bJ3IAP6jIaaE9a23w-w_Bw8j9i-2ZyrEeThfst8EilQ/edit?gid=149299587#gid=149299587",
+    "sheetName": "Player Stats",
+    "statsToDrop": [
+      "avg",
+      "obp",
+      "slugging",
+      "ops",
+      "era",
+      "Starred",
+      "Times Traded"
+    ]
+  },
+  "generalStats": {
+    "sheet": 1,
+    "rowsToDrop": [9, 19],
+    "statsToDrop": [
+      "Team",
+      "Hits",
+      "Total Bases",
+      "Star Swings",
+      "Stars Used",
+      "Batting Average",
+      "On Base %",
+      "Slug %",
+      "On Base + Slug",
+      "Star Slug %",
+      "Steal Attempts",
+      "Star Bases Helper"
+    ],
+    "statMapping": {
+      "Player": "Player",
+      "Position": "position",
+      "At-Bats": "ab",
+      "Plate Appearances": "pa",
+      "Runs": "runs",
+      "RBI": "rbis",
+      "Strikeouts": "strikeouts",
+      "Walks": "walks",
+      "Hit By Pitch": "hbp",
+      "Singles": "1b",
+      "Doubles": "2b",
+      "Triples": "3b",
+      "Home Runs": "hr",
+      "1HR": "1HR",
+      "2HR": "2HR",
+      "3HR": "3HR",
+      "Grand Slams": "Grand Slams",
+      "ITP Home Runs": "itphr",
+      "Sac Flys": "sac flys",
+      "Double Plays Hit Into": "dphi",
+      "Triple Plays Hit Into": "tphi",
+      "Buddy Jumps Hit Into": "bjhi",
+      "Star Hits": "star hits",
+      "Stolen Bases": "sb",
+      "Caught Stealing": "cs",
+      "Putouts": "putouts",
+      "Assists": "assists",
+      "Buddy Jump Putouts": "buddy jumps",
+      "Buddy Jump Attempts": "buddy jump attempts",
+      "Double Plays": "double plays",
+      "Triple Plays": "triple plays",
+      "Bobbles": "bobbles"
+    }
+  },
+  "pitchingStats": {
+    "sheet": 2,
+    "statsToDrop": [
+      "Team",
+      "Runs Allowed",
+      "Inherited Runs",
+      "Stars Used",
+      "Pickoffs",
+      "Pickoff Attempts",
+      "ERA-7",
+      "ERA-9",
+      "WHIP",
+      "BA Against",
+      "OB% Against",
+      "SLG Against",
+      "OPS Against",
+      "At-Bats Against Helper",
+      "Total Bases Allowed Helper"
+    ],
+    "statMapping": {
+      "Player": "Player",
+      "Batters Faced": "batters faced",
+      "Innings Pitched": "ip",
+      "Pitches": "pitches",
+      "Strikes": "strikes",
+      "Balls": "balls",
+      "Strikeouts": "strikeouts (p)",
+      "Walks": "walks (p)",
+      "Bean Balls": "bean balls (p)",
+      "Hits Allowed": "hits allowed",
+      "Singles Allowed": "1b allowed",
+      "Doubles Allowed": "2b allowed",
+      "Triples Allowed": "3b allowed",
+      "HR Allowed": "hr allowed",
+      "Earned Runs": "er",
+      "Star Pitches": "star pitches"
     }
   }
 }
