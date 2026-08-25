@@ -10,8 +10,10 @@ import json
 
 
 def main():
-  credentials_json = json.loads(os.getenv("GSPREAD_CREDENTIALS"))
+  credentials_env = os.getenv("GSPREAD_CREDENTIALS")
+  stat_sheet_url = os.getenv("STAT_SHEET_URL")
 
+  credentials_json = json.loads(credentials_env)
   scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
@@ -22,10 +24,10 @@ def main():
 
   with open('config.json', 'r') as config_file:    # Open the file
     config = json.load(config_file)    # Get the config
-    
+
   actual_stats_config = config["actualStats"]
   
-  sheet = gc.open_by_url(actual_stats_config['statSheetURL']) 
+  sheet = gc.open_by_url(stat_sheet_url) 
   worksheet = sheet.worksheet(actual_stats_config['sheetName'])
   actual_stats = get_as_dataframe(worksheet)
 

@@ -1,6 +1,5 @@
 {
   "actualStats": {
-    "statSheetURL": "https://docs.google.com/spreadsheets/d/1bJ3IAP6jIaaE9a23w-w_Bw8j9i-2ZyrEeThfst8EilQ/edit?gid=149299587#gid=149299587",
     "sheetName": "Player Stats",
     "statsToDrop": [
       "avg",
