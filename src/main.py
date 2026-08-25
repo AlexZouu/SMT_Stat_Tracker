@@ -11,14 +11,20 @@ import json
 from stats import stats
 import tkinter as tk
 
-
 def write_stats(worksheet, stats):
+  # Write a dataframe of the entire player stat sheet
+  # The reason we do that instead of targeting specific rows and columns is to save on API calls
+  # This application uses gspread-dataframes, which can only read and write the entire sheet or blocks of the sheet
+  # There is a batch_update function in base gspread which can write specific rows and columns in one API call, but it can't take dataframes
+  # Also, the sheet we're working with is relatively small, so there's not a big issue with writing the entire thing. 
   set_with_dataframe(worksheet, stats, row=1, col=1)
 
 
 def update_stats(config, worksheet):
   actual_stats = get_as_dataframe(worksheet)
   backup.create_backup(config, actual_stats)
+  new_stats = stats.get_new_stats(config, actual_stats)
+  # write_stats(worksheet, new_stats)
 
 
 def restore_backup(worksheet):
@@ -51,39 +57,41 @@ def main():
   root.title("Stat Tracker")
   root.geometry("500x150")
   root.columnconfigure(0, weight=1)
-  root.columnconfigure(1, weight=1)
-  root.columnconfigure(2, weight=1)
+  root.columnconfigure(1, weight=0)
+  root.columnconfigure(2, weight=0)
+  root.columnconfigure(3, weight=0)
+  root.columnconfigure(4, weight=1)
 
   label = tk.Label(root, text="Slugger Stat Tracker", font=("Arial", 14), pady=20)
-  label.grid(row=0, column=0, columnspan=3)
+  label.grid(row=0, column=1, columnspan=3)
 
   stat_button = tk.Button(
       root, 
       text="Record game stats", 
       command=lambda: update_stats(config, worksheet), 
-      bg="blue", 
-      fg="white", 
+      # bg="blue", 
+      # fg="white", 
   )
 
   backup_button = tk.Button(
       root, 
       text="Restore backup", 
       command=lambda: restore_backup(worksheet), 
-      bg="blue", 
-      fg="white", 
+      # bg="blue", 
+      # fg="white", 
   )
 
   quit_button = tk.Button(
       root, 
       text="Close application", 
       command=root.destroy, 
-      bg="blue", 
-      fg="white", 
+      # bg="blue", 
+      # fg="white", 
   )
 
-  stat_button.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-  backup_button.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
-  quit_button.grid(row=1, column=2, padx=10, pady=10, sticky="ew")
+  stat_button.grid(row=1, column=1, padx=10, pady=10, sticky="s")
+  backup_button.grid(row=1, column=2, padx=10, pady=10, sticky="s")
+  quit_button.grid(row=1, column=3, padx=10, pady=10, sticky="s")
 
   root.mainloop()
 
