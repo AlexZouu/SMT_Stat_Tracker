@@ -1,7 +1,9 @@
+from datetime import datetime
 import gspread
 from gspread_dataframe import get_as_dataframe
 import json
 import pandas as pd
+from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -41,7 +43,7 @@ def readNewStats(generalConfig, pitchingConfig):
   return combinedStats
 
 
-def readActualStats(config):    # TODO: Maybe don't prune so we use set_with_dataframe
+def readActualStats(config):    # TODO: Maybe don't prune so we can use set_with_dataframe
   gc = gspread.service_account(filename='credentials.json')
   sheet = gc.open_by_url(config['statSheetURL']) 
   worksheet = sheet.worksheet(config['sheetName'])
@@ -51,14 +53,18 @@ def readActualStats(config):    # TODO: Maybe don't prune so we use set_with_dat
   return actualStats
 
 
-def createBackup(actualStats):
-  pass
+def createBackup(config, actualStats):
+  backupDir = Path(config['backupLocation'])
+  backupName = f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
+
+  backupDir.mkdir(parents=True, exist_ok=True)
+  actualStats.to_csv(backupDir / backupName, index=False)
 
 
 def updateActualStats(newStats, actualStats):
   actualStats = actualStats[actualStats['Player'].isin(newStats['Player'])]
 
-  # print(newStats[~newStats['Player'].isin(actualStats['Player'])])
+  print(newStats[~newStats['Player'].isin(actualStats['Player'])])
 
   # TODO: Update games played manually
 
@@ -73,7 +79,7 @@ def main():
     try:
       newStats = readNewStats(config["generalStats"], config["pitchingStats"])    # Get the stats 
       actualStats = readActualStats(config["actualStats"])
-      createBackup(actualStats)
+      createBackup(config, actualStats)
       updateActualStats(newStats, actualStats)
       break
     except Exception as e:
