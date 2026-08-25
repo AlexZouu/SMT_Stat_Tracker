@@ -55,15 +55,17 @@ def main():
 
   root = tk.Tk()
   root.title("Stat Tracker")
-  root.geometry("500x150")
+  root.geometry("500x275")
   root.columnconfigure(0, weight=1)
   root.columnconfigure(1, weight=0)
   root.columnconfigure(2, weight=0)
   root.columnconfigure(3, weight=0)
   root.columnconfigure(4, weight=1)
 
-  label = tk.Label(root, text="Slugger Stat Tracker", font=("Arial", 14), pady=20)
-  label.grid(row=0, column=1, columnspan=3)
+  title_label = tk.Label(root, text=config['appTitle'], font=("Arial", 14), pady=20, justify='left')
+  explanatory_text_label = tk.Label(root, text=config['explanatoryText'], wraplength=300, font=("Arial", 12), pady=10, justify='left')
+  title_label.grid(row=0, column=1, columnspan=3, sticky='w')
+  explanatory_text_label.grid(row=1, column=1, columnspan=3, sticky='w')
 
   stat_button = tk.Button(
       root, 
@@ -89,9 +91,9 @@ def main():
       # fg="white", 
   )
 
-  stat_button.grid(row=1, column=1, padx=10, pady=10, sticky="s")
-  backup_button.grid(row=1, column=2, padx=10, pady=10, sticky="s")
-  quit_button.grid(row=1, column=3, padx=10, pady=10, sticky="s")
+  stat_button.grid(row=2, column=1, padx=10, pady=10, sticky="s")
+  backup_button.grid(row=2, column=2, padx=10, pady=10, sticky="s")
+  quit_button.grid(row=2, column=3, padx=10, pady=10, sticky="s")
 
   root.mainloop()
 
