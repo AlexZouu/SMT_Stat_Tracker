@@ -12,6 +12,21 @@ import json
 from stats import stats
 import tkinter as tk
 
+
+def enable_save_button(save_button):
+  save_button['state'] = tk.NORMAL
+
+
+def update_url(save_button, new_url):
+  save_button['state'] = tk.DISABLED
+  cache.cache_url(new_url)
+
+
+def get_worksheet(config, gc, url):
+  sheet = gc.open_by_url(url) 
+  return sheet.worksheet(config['actualStats']['sheetName'])
+
+
 def write_stats(worksheet, stats):
   # Write a dataframe of the entire player stat sheet
   # The reason we do that instead of targeting specific rows and columns is to save on API calls
@@ -21,21 +36,22 @@ def write_stats(worksheet, stats):
   set_with_dataframe(worksheet, stats, row=1, col=1)
 
 
-def update_stats(config, worksheet):
+def update_stats(config, gc, url):
+  worksheet = get_worksheet(config, gc, url)
   actual_stats = get_as_dataframe(worksheet)
   backup.create_backup(config, actual_stats)
   new_stats = stats.get_new_stats(config, actual_stats)
   # write_stats(worksheet, new_stats)
 
 
-def restore_backup(worksheet):
+def restore_backup(config, gc, url):
+  worksheet = get_worksheet(config, gc, url)
   backup_stats = backup.get_backup()
   write_stats(worksheet, backup_stats)
 
 
 def main():
   credentials_env = os.getenv('GSPREAD_CREDENTIALS')
-  stat_sheet_url = os.getenv('STAT_SHEET_URL')
 
   credentials_json = json.loads(credentials_env)
   scopes = [
@@ -49,21 +65,21 @@ def main():
   with open('config.json', 'r') as config_file:    # Open the file
     config = json.load(config_file)    # Get the config
 
-  actual_stats_config = config['actualStats']
-  
-  sheet = gc.open_by_url(stat_sheet_url) 
-  worksheet = sheet.worksheet(actual_stats_config['sheetName'])
+  url_str = cache.retrieve_url()
+  if not url_str: url_str = ''
 
   root = tk.Tk()
   root.bind_all('<Button-1>', lambda event: event.widget.focus_set())
   root.resizable(False, False)
   root.title('Stat Tracker')
-  root.geometry('500x275')
+  root.geometry('500x300')
   root.columnconfigure(0, weight=1)
   root.columnconfigure(1, weight=0)
   root.columnconfigure(2, weight=0)
   root.columnconfigure(3, weight=0)
   root.columnconfigure(4, weight=1)
+
+  url = tk.StringVar(value=url_str)
 
   title_label = tk.Label(root, text=config['appTitle'], font=('Segoe UI', 14), pady=20, justify='left')
   explanatory_text_label = tk.Label(root, text=config['explanatoryText'], wraplength=300, font=('Segoe UI', 12), pady=10, justify='left')
@@ -73,14 +89,14 @@ def main():
   stat_button = tk.Button(
       root, 
       text='Record game stats', 
-      command=lambda: update_stats(config, worksheet), 
+      command=lambda: update_stats(config, gc, url.get()), 
       font=('Segoe UI', 8)
   )
 
   backup_button = tk.Button(
       root, 
       text='Restore backup', 
-      command=lambda: restore_backup(worksheet), 
+      command=lambda: restore_backup(config, gc, url.get()), 
       font=('Segoe UI', 8)
   )
 
@@ -98,9 +114,18 @@ def main():
   url_entry_label = tk.Label(root, text=config['urlEntryLabel'], font=('Segoe UI', 8), padx=5)
   url_entry_label.grid(row=3, column=1, columnspan=1, sticky='e')
 
-  default_val = tk.StringVar(value='Default text here')
-  sheet_url_entry = tk.Entry(root, textvariable=default_val, font=('Segoe UI', 8), width=40)
+  url.trace_add('write', lambda *args: enable_save_button(save_button))
+  sheet_url_entry = tk.Entry(root, textvariable=url, font=('Segoe UI', 8), width=40)
   sheet_url_entry.grid(row=3, column=2, columnspan=2, pady=10, ipadx=2, ipady=2, sticky='w')
+
+  save_button = tk.Button(
+      root, 
+      text='Save URL', 
+      command=lambda: update_url(save_button, url.get()), 
+      font=('Segoe UI', 8),
+      state=tk.DISABLED
+  )
+  save_button.grid(row=4, column=2)
 
   root.mainloop()
 

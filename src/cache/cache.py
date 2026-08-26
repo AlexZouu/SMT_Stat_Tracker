@@ -18,7 +18,7 @@ def cache_parameter(key, value):
 
 def retrieve_parameter(key):
   try:
-    with open('cache.json', 'r') as cache_file:
+    with open('cache/cache.json', 'r') as cache_file:
       cache = json.load(cache_file)
 
     return cache.get(key)
