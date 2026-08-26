@@ -2,4 +2,4 @@
 .env
 __pycache__/
 src/backup/backups/*
-*/cache.json
+src/cache/cache.json

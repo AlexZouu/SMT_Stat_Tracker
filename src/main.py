@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from backup import backup
+from cache import cache
 from google.oauth2.service_account import Credentials
 import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
