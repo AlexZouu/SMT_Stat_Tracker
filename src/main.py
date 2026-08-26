@@ -33,8 +33,8 @@ def restore_backup(worksheet):
 
 
 def main():
-  credentials_env = os.getenv("GSPREAD_CREDENTIALS")
-  stat_sheet_url = os.getenv("STAT_SHEET_URL")
+  credentials_env = os.getenv('GSPREAD_CREDENTIALS')
+  stat_sheet_url = os.getenv('STAT_SHEET_URL')
 
   credentials_json = json.loads(credentials_env)
   scopes = [
@@ -48,52 +48,58 @@ def main():
   with open('config.json', 'r') as config_file:    # Open the file
     config = json.load(config_file)    # Get the config
 
-  actual_stats_config = config["actualStats"]
+  actual_stats_config = config['actualStats']
   
   sheet = gc.open_by_url(stat_sheet_url) 
   worksheet = sheet.worksheet(actual_stats_config['sheetName'])
 
   root = tk.Tk()
-  root.title("Stat Tracker")
-  root.geometry("500x275")
+  root.bind_all('<Button-1>', lambda event: event.widget.focus_set())
+  root.resizable(False, False)
+  root.title('Stat Tracker')
+  root.geometry('500x275')
   root.columnconfigure(0, weight=1)
   root.columnconfigure(1, weight=0)
   root.columnconfigure(2, weight=0)
   root.columnconfigure(3, weight=0)
   root.columnconfigure(4, weight=1)
 
-  title_label = tk.Label(root, text=config['appTitle'], font=("Arial", 14), pady=20, justify='left')
-  explanatory_text_label = tk.Label(root, text=config['explanatoryText'], wraplength=300, font=("Arial", 12), pady=10, justify='left')
+  title_label = tk.Label(root, text=config['appTitle'], font=('Segoe UI', 14), pady=20, justify='left')
+  explanatory_text_label = tk.Label(root, text=config['explanatoryText'], wraplength=300, font=('Segoe UI', 12), pady=10, justify='left')
   title_label.grid(row=0, column=1, columnspan=3, sticky='w')
   explanatory_text_label.grid(row=1, column=1, columnspan=3, sticky='w')
 
   stat_button = tk.Button(
       root, 
-      text="Record game stats", 
+      text='Record game stats', 
       command=lambda: update_stats(config, worksheet), 
-      # bg="blue", 
-      # fg="white", 
+      font=('Segoe UI', 8)
   )
 
   backup_button = tk.Button(
       root, 
-      text="Restore backup", 
+      text='Restore backup', 
       command=lambda: restore_backup(worksheet), 
-      # bg="blue", 
-      # fg="white", 
+      font=('Segoe UI', 8)
   )
 
   quit_button = tk.Button(
       root, 
-      text="Close application", 
+      text='Close application', 
       command=root.destroy, 
-      # bg="blue", 
-      # fg="white", 
+      font=('Segoe UI', 8)
   )
 
-  stat_button.grid(row=2, column=1, padx=10, pady=10, sticky="s")
-  backup_button.grid(row=2, column=2, padx=10, pady=10, sticky="s")
-  quit_button.grid(row=2, column=3, padx=10, pady=10, sticky="s")
+  stat_button.grid(row=2, column=1, padx=10, pady=10, sticky='s')
+  backup_button.grid(row=2, column=2, padx=10, pady=10, sticky='s')
+  quit_button.grid(row=2, column=3, padx=10, pady=10, sticky='s')
+
+  url_entry_label = tk.Label(root, text=config['urlEntryLabel'], font=('Segoe UI', 8), padx=5)
+  url_entry_label.grid(row=3, column=1, columnspan=1, sticky='e')
+
+  default_val = tk.StringVar(value='Default text here')
+  sheet_url_entry = tk.Entry(root, textvariable=default_val, font=('Segoe UI', 8), width=40)
+  sheet_url_entry.grid(row=3, column=2, columnspan=2, pady=10, ipadx=2, ipady=2, sticky='w')
 
   root.mainloop()
 
