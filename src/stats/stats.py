@@ -1,16 +1,18 @@
-import gspread
-from gspread_dataframe import get_as_dataframe
-import json
+import numpy as np
 import pandas as pd
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
 
-def read_new_stats(general_config, pitching_config): 
+def read_new_stats(config): 
   stat_sheet = filedialog.askopenfilename(title="Select a File")   # Prompt the user to select the sheet with the stats
 
   if not stat_sheet: raise Exception('No file selected.')
   if not stat_sheet.endswith('.xlsx'): raise Exception('You must select a valid xlsx file.')
+
+  general_config = config['generalStats']
+  pitching_config = config['pitchingStats']
+  actual_stats_config = config['actualStats']
 
   general_stats = pd.read_excel(stat_sheet, sheet_name=general_config['sheet'])    # Get the second sheet with the general player stats
   general_stats = general_stats.drop(general_config['rowsToDrop'])   # Drop the rows with the team summary
@@ -27,38 +29,50 @@ def read_new_stats(general_config, pitching_config):
 
   # Note: We have the rename the stats before combining the general and pitching stats as there are duplicate stat names
 
+  player_name_map = actual_stats_config['playerNameMap']
+  stats_not_of_int_type = actual_stats_config['statsNotOfIntType']
+
   combined_stats = pd.merge(general_stats, pitching_stats, on='Player', how='left')    # Merge the pitching stats into the general stats based on the player
+  combined_stats['Player'] = combined_stats['Player'].replace(player_name_map)
   combined_stats = combined_stats.fillna(0)   # Fill the pitching stats that are NaN with 0
+  type_mapping = {stat: int for stat in combined_stats.columns if stat not in stats_not_of_int_type}
+  combined_stats = combined_stats.astype(type_mapping)
+  combined_stats['gp'] = 1
 
   return combined_stats
 
 
-def read_actual_stats(actual_stats_config):    # TODO: Maybe don't prune so we can use set_with_dataframe
-  gc = gspread.service_account(filename='credentials.json')
-  sheet = gc.open_by_url(actual_stats_config['stat_sheetURL']) 
-  worksheet = sheet.worksheet(actual_stats_config['sheetName'])
-  actual_stats = get_as_dataframe(worksheet)
+def update_actual_stats(config, new_stats, actual_stats):
+  base_stats = actual_stats[actual_stats['Player'].isin(new_stats['Player'])]
+  players_not_updated = new_stats[~new_stats['Player'].isin(base_stats['Player'])]['Player']
+  stats_to_add = new_stats[new_stats['Player'].isin(base_stats['Player'])]
 
-  return actual_stats
+  base_stats['position'] = base_stats['Player'].map(stats_to_add.set_index('Player')['position'])
+  stats_to_add = stats_to_add.drop(columns=['position'])
+
+  base_stats = base_stats.set_index('Player', drop=False)
+  stats_to_add = stats_to_add.set_index('Player')
+
+  stats_of_string_type = config['actualStats']['statsOfStringType']
+
+  combined_stats = pd.concat([base_stats, stats_to_add])
+  combined_stats = combined_stats.fillna({stat: 0 for stat in combined_stats.columns if stat not in stats_of_string_type})
+  combined_stats = combined_stats.groupby(level=0).sum()
+
+  actual_stats = actual_stats.fillna({stat: 0 for stat in actual_stats.columns if stat not in stats_of_string_type})
+
+  actual_stats = actual_stats.set_index('Player', drop=False)
+  actual_stats.update(combined_stats)
+
+  return actual_stats, players_not_updated
 
 
-def update_actual_stats(new_stats, actual_stats):
-  actual_stats = actual_stats[actual_stats['Player'].isin(new_stats['Player'])]
 
-  print(new_stats[~new_stats['Player'].isin(actual_stats['Player'])])
+def get_new_stats(config, actual_stats):
+  new_stats = read_new_stats(config)    # Get the stats 
+  stats_to_write, players_not_updated = update_actual_stats(config, new_stats, actual_stats)
 
-  # TODO: Update games played manually
-
-
-def update_stats():
-  with open('config.json', 'r') as config_file:    # Open the file
-    config = json.load(config_file)    # Get the config
-
-  new_stats = None
-
-  new_stats = read_new_stats(config["general_stats"], config["pitching_stats"])    # Get the stats 
-  actual_stats = read_actual_stats(config["actual_stats"])
-  update_actual_stats(new_stats, actual_stats)
+  return stats_to_write, players_not_updated
     # except Exception as e:
     #   raise e   # TODO: Remove this once done
     #   choice = messagebox.askyesno(

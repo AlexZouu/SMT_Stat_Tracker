@@ -40,8 +40,8 @@ def update_stats(config, gc, url):
   worksheet = get_worksheet(config, gc, url)
   actual_stats = get_as_dataframe(worksheet)
   backup.create_backup(config, actual_stats)
-  new_stats = stats.get_new_stats(config, actual_stats)
-  # write_stats(worksheet, new_stats)
+  new_stats, players_not_updated = stats.get_new_stats(config, actual_stats)
+  write_stats(worksheet, new_stats)
 
 
 def restore_backup(config, gc, url):
