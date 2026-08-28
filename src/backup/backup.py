@@ -7,7 +7,7 @@ from tkinter import filedialog
 
 
 def create_backup(config, actual_stats):
-  backup_dir = Path(config['backupLocation'])
+  backup_dir = Path(f'{src_dir}/backup/backups')
   backup_name = f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
 
   backup_dir.mkdir(parents=True, exist_ok=True)

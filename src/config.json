@@ -221,7 +221,6 @@
       "Star Pitches": "star pitches"
     }
   },
-  "backupLocation": "./backup/backups/",
   "numBackupsKept": 10,
   "appTitle": "Slugger Stat Tracker",
   "explanatoryText": "Welcome to the Slugger Stat Tracker! This application will take an xlsx sheet from the stat tracker and input it into the season stat sheet.",

@@ -9,6 +9,7 @@ from google.oauth2.service_account import Credentials
 import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
 import json
+from pathlib import Path
 from stats import stats
 import tkinter as tk
 
@@ -52,8 +53,8 @@ def restore_backup(config, gc, url):
 
 def main():
   credentials_env = os.getenv('GSPREAD_CREDENTIALS')
-
   credentials_json = json.loads(credentials_env)
+
   scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
@@ -62,10 +63,12 @@ def main():
   credentials = Credentials.from_service_account_info(credentials_json, scopes=scopes)
   gc = gspread.authorize(credentials)
 
-  with open('config.json', 'r') as config_file:    # Open the file
+  src_dir = Path(__file__).resolve().parent
+
+  with open(f'{src_dir}/config.json', 'r') as config_file:    # Open the file
     config = json.load(config_file)    # Get the config
 
-  url_str = cache.retrieve_url()
+  url_str = cache.retrieve_url(src_dir)
   if not url_str: url_str = ''
 
   root = tk.Tk()
