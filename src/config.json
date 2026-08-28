@@ -1,5 +1,5 @@
 {
-  "actualStats": {
+  "targetStats": {
     "sheetName": "Player Stats",
     "statsToDrop": [
       "avg",
@@ -20,7 +20,6 @@
       "Blooper": "Blooper",
       "Blue Dry Bones": "Blue Dry Bones",
       "Blue Kritter": "Blue Kritter",
-      "Blue Magikoopa": "Blue Magikoopa",
       "Blue Noki": "Blue Noki",
       "Blue Pianta": "Blue Pianta",
       "Blue Shy Guy": "Blue Shy Guy",
@@ -49,12 +48,12 @@
       "Green Paratroopa": "Green Paratroopa",
       "Green Shy Guy": "Green Shy Guy",
       "Green Toad": "Green Toad",
-      "Green Yoshi": "Green Yoshi",
       "Hammer Bro.": "Hammer Bro",
       "King Boo": "King Boo",
       "King K. Rool": "King K. Rool",
       "Light-Blue Yoshi": "Light-Blue Yoshi",
       "Luigi": "Luigi",
+      "Magikoopa": "Blue Magikoopa",
       "Mario": "Mario",
       "Monty Mole": "Monty Mole",
       "Paragoomba": "Paragoomba",
@@ -84,6 +83,7 @@
       "Yellow Yoshi": "Yellow Yoshi",
       "White Mii (M)": "Hardboiled",
       "White Mii (F)": "T. Swizzle",
+      "Yoshi": "Green Yoshi",
       "Black Mii (M)": "Scrambler",
       "Pink Mii (M)": "George",
       "Pink Mii (F)": "Nadia",

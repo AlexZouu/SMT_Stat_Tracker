@@ -12,7 +12,7 @@ def read_new_stats(config):
 
   general_config = config['generalStats']
   pitching_config = config['pitchingStats']
-  actual_stats_config = config['actualStats']
+  actual_stats_config = config['targetStats']
 
   general_stats = pd.read_excel(stat_sheet, sheet_name=general_config['sheet'])    # Get the second sheet with the general player stats
   general_stats = general_stats.drop(general_config['rowsToDrop'])   # Drop the rows with the team summary
@@ -40,7 +40,7 @@ def read_new_stats(config):
   combined_stats['gp'] = 1
 
   return combined_stats
-
+  
 
 def update_actual_stats(config, new_stats, actual_stats):
   base_stats = actual_stats[actual_stats['Player'].isin(new_stats['Player'])]
@@ -53,7 +53,7 @@ def update_actual_stats(config, new_stats, actual_stats):
   base_stats = base_stats.set_index('Player', drop=False)
   stats_to_add = stats_to_add.set_index('Player')
 
-  stats_of_string_type = config['actualStats']['statsOfStringType']
+  stats_of_string_type = config['targetStats']['statsOfStringType']
 
   combined_stats = pd.concat([base_stats, stats_to_add])
   combined_stats = combined_stats.fillna({stat: 0 for stat in combined_stats.columns if stat not in stats_of_string_type})
@@ -67,12 +67,70 @@ def update_actual_stats(config, new_stats, actual_stats):
   return actual_stats, players_not_updated
 
 
+# ======================================================================================================================================================
 
-def get_new_stats(config, actual_stats):
-  new_stats = read_new_stats(config)    # Get the stats 
-  stats_to_write, players_not_updated = update_actual_stats(config, new_stats, actual_stats)
 
-  return stats_to_write, players_not_updated
+def get_source_sheet():
+  source_sheet = filedialog.askopenfilename(title="Select a File")   # Prompt the user to select the sheet with the stats
+
+  if not source_sheet: raise Exception('No file selected.')
+  if not source_sheet.endswith('.xlsx'): raise Exception('You must select a valid xlsx file.')
+
+  return source_sheet
+
+
+def get_general_stats(config, source_sheet, target_stats):
+  general_config = config['generalStats']
+  target_stats_config = config['targetStats']
+  general_stats = pd.read_excel(source_sheet, sheet_name=general_config['sheet'])    # Get the second sheet with the general player stats
+  general_stats = general_stats.drop(general_config['rowsToDrop'])   # Drop the rows with the team summary
+  general_stats = general_stats.drop(columns=general_config['statsToDrop'])    # Drop any stats we don't want
+  general_stats = general_stats.rename(columns=general_config['statMapping'])    # Rename the stats so they match the actual stat sheet
+  # This next statement gets rid of any positions that aren't the player's starting position
+  # For example if Luigi started as pitcher and swapped to catcher, his position would be P, C
+  # This gets rid of everything other than the P
+  general_stats['position'] = general_stats['position'].apply(lambda x: x if x.find(',') == -1 else x[0:x.find(',')])
+
+  player_name_map = target_stats_config['playerNameMap']
+  general_stats['Player'] = general_stats['Player'].replace(player_name_map)
+
+  players_not_in_target_stats = general_stats[~general_stats['Player'].isin(target_stats['Player'])]
+  players_not_in_target_stats['Player'] = players_not_in_target_stats['Player'].astype(str) + '_' + players_not_in_target_stats['position'].astype(str)
+
+  print(players_not_in_target_stats)
+
+  return general_stats
+
+
+def get_pitching_stats(pitching_config, source_sheet):
+  pitching_stats = pd.read_excel(source_sheet, sheet_name=pitching_config['sheet'])    # Get the third sheet with the pitching stats
+  pitching_stats = pitching_stats.drop(columns=pitching_config['statsToDrop']).iloc[:len(pitching_stats) - 2]    # Drop stats we don't want and team summary (last two rows)
+  pitching_stats = pitching_stats.rename(columns=pitching_config['statMapping'])   # Rename the stats so they match the actual stat sheet
+
+  return pitching_stats
+
+
+def combine_stats(config, general_stats, pitching_stats):
+  pass
+
+
+def update_target_stats(config, target_stats, source_stats):
+  pass
+
+
+def get_stats_to_write(config, target_stats):
+  # new_stats = read_new_stats(config)    # Get the stats 
+  # stats_to_write = update_actual_stats(config, new_stats, target_stats)
+
+  # ===========================================================================
+
+  source_sheet = get_source_sheet()
+  general_stats = get_general_stats(config, source_sheet, target_stats)
+  pitching_stats = get_pitching_stats(config, source_sheet)
+  source_stats = combine_stats(general_stats, pitching_stats)
+  new_target_stats = update_target_stats(target_stats, source_stats)
+
+  # return stats_to_write, players_not_updated
     # except Exception as e:
     #   raise e   # TODO: Remove this once done
     #   choice = messagebox.askyesno(

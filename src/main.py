@@ -25,7 +25,7 @@ def update_url(save_button, new_url):
 
 def get_worksheet(config, gc, url):
   sheet = gc.open_by_url(url) 
-  return sheet.worksheet(config['actualStats']['sheetName'])
+  return sheet.worksheet(config['targetStats']['sheetName'])
 
 
 def write_stats(worksheet, stats):
@@ -37,12 +37,12 @@ def write_stats(worksheet, stats):
   set_with_dataframe(worksheet, stats, row=1, col=1)
 
 
-def update_stats(config, gc, url):
+def update_stats(config, src_dir, gc, url):
   worksheet = get_worksheet(config, gc, url)
   actual_stats = get_as_dataframe(worksheet)
-  backup.create_backup(config, actual_stats)
-  new_stats, players_not_updated = stats.get_new_stats(config, actual_stats)
-  write_stats(worksheet, new_stats)
+  backup.create_backup(config, src_dir, actual_stats)
+  new_stats = stats.get_stats_to_write(config, actual_stats)
+  # write_stats(worksheet, new_stats)
 
 
 def restore_backup(config, gc, url):
@@ -92,7 +92,7 @@ def main():
   stat_button = tk.Button(
       root, 
       text='Record game stats', 
-      command=lambda: update_stats(config, gc, url.get()), 
+      command=lambda: update_stats(config, src_dir, gc, url.get()), 
       font=('Segoe UI', 8)
   )
 
