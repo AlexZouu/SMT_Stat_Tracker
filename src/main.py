@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from stats import stats
 import tkinter as tk
+from tkinter import messagebox
 
 
 def enable_save_button(save_button):
@@ -28,6 +29,13 @@ def get_worksheet(config, gc, url):
   return sheet.worksheet(config['targetStats']['sheetName'])
 
 
+def handle_unknown_players(root, unknown_players):
+  print(unknown_players)
+  unknown_player_string = unknown_players['Player-position'].str.cat(sep='\n')
+  if len(unknown_players) != 0:
+    messagebox.showinfo('Unknown Players', f'These players could not be found in the target spreadsheet, please update their stats them manually:\n\n{unknown_player_string}', parent=root)
+
+
 def write_stats(worksheet, stats):
   # Write a dataframe of the entire player stat sheet
   # The reason we do that instead of targeting specific rows and columns is to save on API calls
@@ -37,12 +45,13 @@ def write_stats(worksheet, stats):
   set_with_dataframe(worksheet, stats, row=1, col=1)
 
 
-def update_stats(config, src_dir, gc, url):
+def update_stats(config, src_dir, gc, root, url):
   worksheet = get_worksheet(config, gc, url)
   actual_stats = get_as_dataframe(worksheet)
   backup.create_backup(config, src_dir, actual_stats)
-  new_stats = stats.get_stats_to_write(config, actual_stats)
-  # write_stats(worksheet, new_stats)
+  new_stats, unknown_players = stats.get_stats_to_write(config, actual_stats)
+  write_stats(worksheet, new_stats)
+  handle_unknown_players(root, unknown_players)
 
 
 def restore_backup(config, gc, url):
@@ -92,7 +101,7 @@ def main():
   stat_button = tk.Button(
       root, 
       text='Record game stats', 
-      command=lambda: update_stats(config, src_dir, gc, url.get()), 
+      command=lambda: update_stats(config, src_dir, gc, root, url.get()), 
       font=('Segoe UI', 8)
   )
 
