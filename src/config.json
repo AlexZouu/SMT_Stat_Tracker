@@ -223,6 +223,26 @@
   },
   "numBackupsKept": 10,
   "appTitle": "Slugger Stat Tracker",
-  "explanatoryText": "Welcome to the Slugger Stat Tracker! This application will take an xlsx sheet from the stat tracker and input it into the season stat sheet.",
-  "urlEntryLabel": "Paste stat sheet URL here:"
+  "explanatoryText": "Welcome to the Slugger Stat Tracker! This application will take an xlsx sheet from the Dolphin stat tracker and automatically input it into the season stat sheet.\n\nNote: Please do not make any changes to the season stat sheet until the application has finished, as that may lead to lost data or other unexpected issues.",
+  "urlEntryLabel": "Paste stat sheet URL here:",
+  "successPopupTitles": [
+    "Hooray!",
+    "Good job!",
+    "Yay!",
+    "Amazing!",
+    "Success!",
+    "Congratulations!",
+    "Thank god",
+    "Stats changes sheets"
+  ],
+  "successPopupTitlesWithUnknowns": [
+    "Stats change, for only some"
+  ],
+  "errorPopupTitles": [
+    "Oh no",
+    "Drats!",
+    "Denied",
+    "Stats change, for no one",
+    "FEEST BOMP!"
+  ]
 }
