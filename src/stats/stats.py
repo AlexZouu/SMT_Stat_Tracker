@@ -89,7 +89,7 @@ def update_target_stats(config, target_stats, source_stats):
 
   target_stats = pd.concat([target_stats, source_stats])
   target_stats = target_stats.fillna({stat: 0 for stat in target_stats.columns if stat not in stats_of_string_type})
-  target_stats = target_stats.groupby(level=0).sum()
+  target_stats = target_stats.groupby(level=0, sort=False).sum()
 
   return target_stats
 

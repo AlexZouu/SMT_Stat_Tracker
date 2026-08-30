@@ -20,9 +20,9 @@ def enable_save_button(save_button):
   save_button['state'] = tk.NORMAL
 
 
-def update_url(save_button, new_url):
+def update_url(save_button, src_dir, new_url):
   save_button['state'] = tk.DISABLED
-  cache.cache_url(new_url)
+  cache.cache_url(src_dir, new_url)
 
 
 def get_worksheet(config, gc, url):
@@ -156,7 +156,7 @@ def main():
     save_button = tk.Button(
         root, 
         text='Save URL', 
-        command=lambda: update_url(save_button, url.get()), 
+        command=lambda: update_url(save_button, src_dir, url.get()), 
         font=('Segoe UI', 8),
         state=tk.DISABLED
     )

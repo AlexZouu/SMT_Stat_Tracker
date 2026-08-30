@@ -9,10 +9,10 @@ def cache_parameter(src_dir, key, value):
 
     cache[key] = value
 
-    with open(f'{src_dir}cache/cache.json', 'w') as cache_file:
+    with open(f'{src_dir}/cache/cache.json', 'w') as cache_file:
       json.dump(cache, cache_file)
   except (FileNotFoundError, json.JSONDecodeError):   # If the file doesn't exist or is empty, write the value
-    with open('cache/cache.json', 'w') as cache_file:
+    with open(f'{src_dir}/cache/cache.json', 'w') as cache_file:
       json.dump({key: value}, cache_file)
 
 
@@ -29,7 +29,7 @@ def retrieve_parameter(src_dir, key):
 
 
 def cache_url(src_dir, url):
-  cache_parameter('statSheetURL', url)
+  cache_parameter(src_dir, 'statSheetURL', url)
 
 
 def cache_default_stat_sheet_path(path):
