@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def cache_parameter(key, value):
-  src_dir = os.environ.get('SRC_DIR')
+  src_dir = os.getenv('SRC_DIR')
   try:
     with open(f'{src_dir}/cache/cache.json', 'r') as cache_file:
       cache = json.load(cache_file)
@@ -19,7 +19,7 @@ def cache_parameter(key, value):
 
 
 def retrieve_parameter(key):
-  src_dir = os.environ.get('SRC_DIR')
+  src_dir = os.getenv('SRC_DIR')
   try:
     with open(f'{src_dir}/cache/cache.json', 'r') as cache_file:
       cache = json.load(cache_file)

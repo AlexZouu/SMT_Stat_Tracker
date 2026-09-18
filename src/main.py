@@ -55,17 +55,26 @@ def update_stats(config, gc, root, url):
     worksheet = get_worksheet(config, gc, url)
     actual_stats = get_as_dataframe(worksheet)
     backup.create_backup(config, actual_stats)
-    new_stats, unknown_players = stats.get_stats_to_write(config, actual_stats)
-    write_stats(worksheet, new_stats)
+
+    new_stats, duplicate_player, unknown_players = stats.get_stats_to_write(config, actual_stats)
+    duplicate_player_string = '\n'.join(duplicate_player)
     unknown_player_string = unknown_players['Player-position'].str.cat(sep='\n')
-    if len(unknown_players) != 0:
-      title = get_success_title(config, True)
-      messagebox.showinfo(title, f'Most of the stats have been written!\n\nHowever, a few players listed below could could not be found in the season stat sheet, please update their stats manually:\n\n{unknown_player_string}', parent=root)
+    duplicates_exist = len(duplicate_player) > 0
+    unknowns_exist = len(unknown_players) > 0
+
+    write_stats(worksheet, new_stats)
+    
+    title = get_success_title(config)
+
+    if not duplicates_exist and not unknowns_exist:
+      messagebox.showinfo(title, 'The stats have been written!', parent=root)
+    elif duplicates_exist and unknowns_exist:
+      messagebox.showinfo(title, f'Most of stats have been written!\n\nHowever, the player(s) listed below could could not be found in the season stat sheet:\n\n{unknown_player_string}\n\nAdditionally, there are players of the same name in the games and their stats could not be updated:\n\n{duplicate_player_string}\n\n Please update their stats manually', parent=root)
+    elif duplicates_exist:
+      messagebox.showinfo(title, f'Most of the stats have been written!\n\nHowever, there are players of the same name in the games and their stats could not be updated. Their names have been listed below, please update their stats manually:\n\n{duplicate_player_string}')
     else:
-      title = get_success_title(config)
-      messagebox.showinfo('Success!', 'The stats have been written!', parent=root)
+      messagebox.showinfo(title, f'Most of the stats have been written!\n\nHowever, the player(s) listed below could could not be found in the season stat sheet, please update their stats manually:\n\n{unknown_player_string}', parent=root)
   except Exception as e:
-    raise e   # TODO: remove when done
     title = get_error_title(config)
     messagebox.showerror(title, f'An error has occured while updating the stats, and as such no changes have been made. Please try again, or contact Sluggers Stat Tracker tech support for help\n\nError: {e}', parent=root)
 

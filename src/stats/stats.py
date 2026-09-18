@@ -19,25 +19,40 @@ def get_source_sheets():
   return source_sheets
 
 
-def get_general_stats(general_config, source_sheet):
-  general_stats = pd.read_excel(source_sheet, sheet_name=general_config['sheet'])    # Get the second sheet with the general player stats
-  general_stats = general_stats.drop(general_config['rowsToDrop'])   # Drop the rows with the team summary
-  general_stats = general_stats.drop(columns=general_config['statsToDrop'])    # Drop any stats we don't want
-  general_stats = general_stats.rename(columns=general_config['statMapping'])    # Rename the stats so they match the actual stat sheet
+def get_general_stats(general_config, source_sheets):
+  combined_general_stats = None
+
+  for sheet in source_sheets:
+    general_stats = pd.read_excel(sheet, sheet_name=general_config['sheet'])    # Get the second sheet with the general player stats
+    general_stats = general_stats.drop(general_config['rowsToDrop'])   # Drop the rows with the team summary
+    combined_general_stats = general_stats if combined_general_stats is None else pd.concat([combined_general_stats, general_stats], ignore_index=True)
+
+  combined_general_stats = combined_general_stats.drop(columns=general_config['statsToDrop'])    # Drop any stats we don't want
+  combined_general_stats = combined_general_stats.rename(columns=general_config['statMapping'])    # Rename the stats so they match the actual stat sheet
   # This next statement gets rid of any positions that aren't the player's starting position
   # For example if Luigi started as pitcher and swapped to catcher, his position would be tracked as P, C
   # This gets rid of everything other than the P
-  general_stats['position'] = general_stats['position'].apply(lambda x: x if x.find(',') == -1 else x[0:x.find(',')])
+  combined_general_stats['position'] = combined_general_stats['position'].apply(lambda x: x if x.find(',') == -1 else x[0:x.find(',')])
 
-  return general_stats
+  duplicate_players = combined_general_stats[combined_general_stats.duplicated(subset=['Player'])]['Player'].to_list()    # Get all the duplicated players
+
+  combined_general_stats = combined_general_stats[~combined_general_stats['Player'].isin(duplicate_players)]    # Remove the duplicated players
+
+  return combined_general_stats, duplicate_players
 
 
-def get_pitching_stats(pitching_config, source_sheet):
-  pitching_stats = pd.read_excel(source_sheet, sheet_name=pitching_config['sheet'])    # Get the third sheet with the pitching stats
-  pitching_stats = pitching_stats.drop(columns=pitching_config['statsToDrop']).iloc[:len(pitching_stats) - 2]    # Drop stats we don't want and team summary (last two rows)
-  pitching_stats = pitching_stats.rename(columns=pitching_config['statMapping'])   # Rename the stats so they match the actual stat sheet
+def get_pitching_stats(pitching_config, source_sheets, duplicate_players):
+  combined_pitching_stats = None
 
-  return pitching_stats
+  for sheet in source_sheets:
+    pitching_stats = pd.read_excel(sheet, sheet_name=pitching_config['sheet'])    # Get the third sheet with the pitching stats
+    pitching_stats = pitching_stats.drop(columns=pitching_config['statsToDrop']).iloc[:len(pitching_stats) - 2]    # Drop stats we don't want and team summary (last two rows)
+    combined_pitching_stats = pitching_stats if combined_pitching_stats is None else pd.concat([combined_pitching_stats, pitching_stats], ignore_index=True)
+
+  combined_pitching_stats = combined_pitching_stats.rename(columns=pitching_config['statMapping'])   # Rename the stats so they match the actual stat sheet
+  combined_pitching_stats = combined_pitching_stats[~combined_pitching_stats['Player'].isin(duplicate_players)]
+
+  return combined_pitching_stats
 
 
 def combine_stats(config, target_stats, general_stats, pitching_stats):
@@ -102,9 +117,9 @@ def update_target_stats(config, target_stats, source_stats):
 
 def get_stats_to_write(config, target_stats):
   source_sheets = get_source_sheets()
-  general_stats = get_general_stats(config['generalStats'], source_sheets)
-  pitching_stats = get_pitching_stats(config['pitchingStats'], source_sheets)
+  general_stats, duplicate_players = get_general_stats(config['generalStats'], source_sheets)
+  pitching_stats = get_pitching_stats(config['pitchingStats'], source_sheets, duplicate_players)
   source_stats, unknown_general_stats, unknown_pitching_stats = combine_stats(config, target_stats, general_stats, pitching_stats)
   new_target_stats = update_target_stats(config, target_stats, source_stats)
 
-  return new_target_stats, unknown_general_stats
+  return new_target_stats, duplicate_players, unknown_general_stats

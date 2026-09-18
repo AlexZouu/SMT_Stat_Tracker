@@ -1,15 +1,6 @@
 {
   "targetStats": {
     "sheetName": "Player Stats",
-    "statsToDrop": [
-      "avg",
-      "obp",
-      "slugging",
-      "ops",
-      "era",
-      "Starred",
-      "Times Traded"
-    ],
     "playerNameMap": {
       "Baby Daisy": "Baby Daisy",
       "Baby DK": "Baby DK",
