@@ -20,9 +20,9 @@ def enable_save_button(save_button):
   save_button['state'] = tk.NORMAL
 
 
-def update_url(save_button, src_dir, new_url):
+def update_url(save_button, new_url):
   save_button['state'] = tk.DISABLED
-  cache.cache_url(src_dir, new_url)
+  cache.cache_url(new_url)
 
 
 def get_worksheet(config, gc, url):
@@ -50,11 +50,11 @@ def write_stats(worksheet, stats):
   set_with_dataframe(worksheet, stats, row=1, col=1)
 
 
-def update_stats(config, src_dir, gc, root, url):
+def update_stats(config, gc, root, url):
   try:
     worksheet = get_worksheet(config, gc, url)
     actual_stats = get_as_dataframe(worksheet)
-    backup.create_backup(config, src_dir, actual_stats)
+    backup.create_backup(config, actual_stats)
     new_stats, unknown_players = stats.get_stats_to_write(config, actual_stats)
     write_stats(worksheet, new_stats)
     unknown_player_string = unknown_players['Player-position'].str.cat(sep='\n')
@@ -65,6 +65,7 @@ def update_stats(config, src_dir, gc, root, url):
       title = get_success_title(config)
       messagebox.showinfo('Success!', 'The stats have been written!', parent=root)
   except Exception as e:
+    raise e   # TODO: remove when done
     title = get_error_title(config)
     messagebox.showerror(title, f'An error has occured while updating the stats, and as such no changes have been made. Please try again, or contact Sluggers Stat Tracker tech support for help\n\nError: {e}', parent=root)
 
@@ -96,12 +97,13 @@ def main():
     credentials = Credentials.from_service_account_info(credentials_json, scopes=scopes)
     gc = gspread.authorize(credentials)
 
-    src_dir = Path(__file__).resolve().parent
+    src_dir = str(Path(__file__).resolve().parent)
+    os.environ['SRC_DIR'] = src_dir
 
     with open(f'{src_dir}/config.json', 'r') as config_file:    # Open the file
       config = json.load(config_file)    # Get the config
 
-    url_str = cache.retrieve_url(src_dir)
+    url_str = cache.retrieve_url()
     if not url_str: url_str = ''
 
     root.bind_all('<Button-1>', lambda event: event.widget.focus_set())
@@ -124,7 +126,7 @@ def main():
     stat_button = tk.Button(
         root, 
         text='Record game stats', 
-        command=lambda: update_stats(config, src_dir, gc, root, url.get()), 
+        command=lambda: update_stats(config, gc, root, url.get()), 
         font=('Segoe UI', 8)
     )
 
@@ -156,7 +158,7 @@ def main():
     save_button = tk.Button(
         root, 
         text='Save URL', 
-        command=lambda: update_url(save_button, src_dir, url.get()), 
+        command=lambda: update_url(save_button, url.get()), 
         font=('Segoe UI', 8),
         state=tk.DISABLED
     )
@@ -164,7 +166,8 @@ def main():
 
     root.mainloop()
   except Exception as e:
-    messagebox.showerror('Something really went wrong', f'You shouldn\'t see this error too much. Maybe the API key expired? Or maybe the Google Drive or Google Sheets API\'s are down. Or possibly there\'s an edge case I missed! Either way, good luck!\n\nError: {e}', parent=root)
+    raise e
+    messagebox.showerror('Something really went wrong', f'You shouldn\'t see this error too much. Maybe the API key expired? Or maybe the Google Drive or Google Sheets API\'s are down. Or possibly there\'s a bug I missed! Either way, good luck!\n\nError: {e}', parent=root)
 
 
 if __name__ == '__main__': 

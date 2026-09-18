@@ -2,15 +2,21 @@ import numpy as np
 import pandas as pd
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from cache import cache
 
 
-def get_source_sheet():
-  source_sheet = filedialog.askopenfilename(title="Select a File")   # Prompt the user to select the sheet with the stats
+def get_source_sheets():
+  src_sheet_dir = cache.retrieve_default_source_sheet_path()
+  file_types = [('Excel', '*.xlsx')]
+  source_sheets = filedialog.askopenfilenames(title="Select Files", initialdir=src_sheet_dir, filetypes=file_types)   # Prompt the user to select the sheet with the stats
 
-  if not source_sheet: raise Exception('No file selected.')
-  if not source_sheet.endswith('.xlsx'): raise Exception('You must select a valid xlsx file.')
+  if not source_sheets: raise Exception('No files selected.')
+  if not all(x.endswith('.xlsx') for x in source_sheets): raise Exception('One or more files are not .xlsx files.')
 
-  return source_sheet
+  source_sheet_directory = source_sheets[0][0:source_sheets[0].rfind('/') + 1]
+  cache.cache_default_source_sheet_path(source_sheet_directory)
+
+  return source_sheets
 
 
 def get_general_stats(general_config, source_sheet):
@@ -95,9 +101,9 @@ def update_target_stats(config, target_stats, source_stats):
 
 
 def get_stats_to_write(config, target_stats):
-  source_sheet = get_source_sheet()
-  general_stats = get_general_stats(config['generalStats'], source_sheet)
-  pitching_stats = get_pitching_stats(config['pitchingStats'], source_sheet)
+  source_sheets = get_source_sheets()
+  general_stats = get_general_stats(config['generalStats'], source_sheets)
+  pitching_stats = get_pitching_stats(config['pitchingStats'], source_sheets)
   source_stats, unknown_general_stats, unknown_pitching_stats = combine_stats(config, target_stats, general_stats, pitching_stats)
   new_target_stats = update_target_stats(config, target_stats, source_stats)
 

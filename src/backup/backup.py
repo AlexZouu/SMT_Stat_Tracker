@@ -1,12 +1,15 @@
+from cache import cache
 from datetime import datetime
 import gspread
 from gspread_dataframe import set_with_dataframe
+import os
 import pandas as pd
 from pathlib import Path
 from tkinter import filedialog
 
 
-def create_backup(config, src_dir, actual_stats):
+def create_backup(config, actual_stats):
+  src_dir = os.environ.get('SRC_DIR')
   backup_dir = Path(f'{src_dir}/backup/backups')
   backup_name = f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
 
@@ -26,9 +29,14 @@ def prune_backups(config, backup_dir):
 
 
 def get_backup():
-  backup_csv = filedialog.askopenfilename(title="Select a Backup")   # Prompt the user to select the sheet with the stats
+  backup_dir = cache.retrieve_default_backup_path()
+  file_types = [('Comma-separated Values', '*.csv')]
+  backup_csv = filedialog.askopenfilename(title="Select a Backup", initialdir=backup_dir, filetypes=file_types)   # Prompt the user to select the sheet with the stats
 
   if not backup_csv: raise Exception('No file selected.')
   if not backup_csv.endswith('.csv'): raise Exception('You must select a valid xlsx file.')
+
+  backup_directory = backup_csv[0:backup_csv.rfind('/') + 1]
+  cache.cache_default_backup_path(backup_directory)
 
   return pd.read_csv(backup_csv)
