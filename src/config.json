@@ -61,11 +61,11 @@
       "Petey Piranha": "Petey Piranha",
       "Pink Yoshi": "Pink Yoshi",
       "Purple Toad": "Purple Toad",
-      "Red Koopa": "Red Koopa",
+      "Red Koopa Troopa": "Red Koopa",
       "Red Kritter": "Red Kritter",
       "Red Magikoopa": "Red Magikoopa",
       "Red Noki": "Red Noki",
-      "Red Paratroopa": "Red Paratroopa",
+      "Paratroopa": "Red Paratroopa",
       "Red Pianta": "Red Pianta",
       "Red Toad": "Red Toad",
       "Red Yoshi": "Red Yoshi",
@@ -90,17 +90,21 @@
       "Purple Mii (M)": "Archibald",
       "Purple Mii (F)": "Grimace",
       "Brown Mii (F)": "Jane",
+      "Brown Mii (M)": "Obama",
       "Blue Mii (M)": "E. Gadd",
       "Blue Mii (F)": "CRJ",
       "Light Blue Mii (M)": "House",
       " Light Blue Mii (F)": "Rosalina",
       "Green Mii (F)": "P. Patty",
+      "Green Mii (M)": "Green Guy",
       "Light Green Mii (M)": "Rod F. 4",
       "Light Green Mii (F)": "Petward",
       "Yellow Mii (F)": "Carmichael",
+      "Yellow Mii (M)": "Yoad Mii",
       "Orange Mii (M)": "BOONE",
       "Orange Mii (F)": "Melinoe",
-      "Red Mii (M)": "Man"
+      "Red Mii (M)": "Man",
+      "Red Mii (F)": "Hornet"
     },
     "statsNotOfIntType": [
       "Player",
@@ -132,7 +136,10 @@
   },
   "generalStats": {
     "sheet": 1,
-    "rowsToDrop": [9, 19],
+    "rowsToDrop": [
+      9,
+      19
+    ],
     "statsToDrop": [
       "Team",
       "Hits",
