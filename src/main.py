@@ -175,7 +175,6 @@ def main():
 
     root.mainloop()
   except Exception as e:
-    raise e
     messagebox.showerror('Something really went wrong', f'You shouldn\'t see this error too much. Maybe the API key expired? Or maybe the Google Drive or Google Sheets API\'s are down. Or possibly there\'s a bug I missed! Either way, good luck!\n\nError: {e}', parent=root)
 
 

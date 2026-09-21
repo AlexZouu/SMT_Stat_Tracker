@@ -1,6 +1,5 @@
 import json
 import os
-from pathlib import Path
 
 
 def cache_parameter(key, value):
