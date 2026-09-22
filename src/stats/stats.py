@@ -1,7 +1,5 @@
-import numpy as np
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 from cache import cache
 
 
