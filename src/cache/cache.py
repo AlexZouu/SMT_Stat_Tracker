@@ -24,7 +24,7 @@ def retrieve_parameter(key):
       cache = json.load(cache_file)
     return cache.get(key)
   except (FileNotFoundError, json.JSONDecodeError):   # If the file doesn't exist or is empty, write the value
-    with open('cache/cache.json', 'w') as cache_file:
+    with open(f'{src_dir}/cache/cache.json', 'w') as cache_file:
       json.dump({}, cache_file)
       return None
 
