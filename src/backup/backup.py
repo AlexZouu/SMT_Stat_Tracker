@@ -1,6 +1,5 @@
 from cache import cache
 from datetime import datetime
-import gspread
 from gspread_dataframe import set_with_dataframe
 import os
 import pandas as pd
